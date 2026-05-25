@@ -1,0 +1,39 @@
+Uiteraard! Die mag absoluut niet ontbreken in je blauwdruk, want **audio ducking** is nou net het verschil tussen een app die voelt als een amateuristisch hobbyproject en een app die voelt alsof hij door een miljoenenbedrijf is gebouwd.
+Ik heb het complete overzicht van je app-architectuur hieronder voor je bijgewerkt, inclusief de specifieke Flutter-pakketten die je hiervoor nodig hebt.
+Dit is je definitieve **VibeCode Masterplan**:
+### 1. Audio & Text-to-Speech (De Coach met Manieren)
+Geen schermen bekijken tijdens het rennen, maar puur luisteren.
+ * **flutter_tts (Text-to-Speech):** Hiermee laat je de ingebouwde stem van je telefoon commando's roepen zoals: *"Interval 2 begint nu. Versnel naar zone 4!"*
+ * **audio_session (De Audio Ducking-regelaar):** Dit is de plugin waarmee je de audio-instellingen van je telefoon beheert. Hiermee dwing je het besturingssysteem (Android en iOS) om je Spotify- of podcastmuziek automatisch **tijdelijk te dempen (ducking)** op het exacte moment dat jouw app-coach praat, en de muziek direct weer hard te zetten als de stem klaar is.
+### 2. Hardware & Achtergrond (De Fundering)
+Zorgen dat je app blijft leven als de telefoon in je Decathlon-heupgordel zit met het scherm uit.
+ * **flutter_blue_plus (Bluetooth):** Cruciaal voor de communicatie met de universele *Heart Rate Service* van je Polar H10. Hiermee vang je live de hartslag en RR-intervallen op.
+ * **geolocator + flutter_background_service:** Dwingt de telefoon om de GPS en de Bluetooth-verbinding met je Polar-band netjes live te houden tijdens het rennen, zodat het besturingssysteem je app niet in slaap sust.
+### 3. De Interval- & Lap-Logica (Jouw 'Secret Weapon')
+De feature waarmee je de paywalls van Wahoo en Adidas omzeilt.
+ * **Timer-gedreven Laps:** Een simpele array/lijst waarin je jouw intervalblokken definieert (bijv. [300s warmup, 60s sprint, 120s herstel]).
+ * **Automatische Lap-splits:** Zorg dat de code op de achtergrond exact op het moment van de 'piep' een nieuwe ronde (Lap) start. Sla per lap-object de gemiddelde GPS-snelheid en de gemiddelde hartslag op voor dat prachtige tabelletje achteraf.
+### 4. Data-beheer (Foutjes Corrigeren)
+De ultieme oplossing voor het probleem waarbij je je app bent vergeten uit te zetten.
+ * **Lokale Data-opslag (sqflite of hive):** Sla je trainingen lokaal op je telefoon op als JSON of in een lichte database.
+ * **De 'Crop' (Bijsnijd) Tool:** Bouw een simpele slider in je app-overzicht waarmee je achteraf de eindtijd van je training handmatig kunt terugschuiven. Heb je 4 uur op de bank meegelogd? Dan snijd je die data er in jouw eigen app met één swipe zo vanaf!
+### Preview: Hoe Audio Ducking eruitziet in Flutter
+Om alvast in de vibe te komen, zo configureer je die audio_session straks in je code:
+```dart
+import 'package:audio_session/audio_session.dart';
+
+Future<void> configureAudioSession() async {
+  final session = await AudioSession.instance;
+  await session.configure(const AudioSessionConfiguration(
+    avAudioSessionCategory: AVAudioSessionCategory.speech,
+    avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers, // <- DE DUCKING MAGIC!
+    androidAudioAttributes: AndroidAudioAttributes(
+      contentType: AndroidContentType.speech,
+      usage: AndroidUsage.assistanceNavigationGuidance,
+    ),
+    androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientMayDuck, // <- OOK VOOR ANDROID!
+  ));
+}
+
+```
+Met dit lijstje op zak kun je stap voor stap je AI-assistent aan het werk zetten om de functies voor je te schrijven. Succes met bouwen, je hebt hiermee echt goud in handen voor je eigen trainingen!
