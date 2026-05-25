@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import '../models/activity.dart';
+import '../models/sport_category.dart';
 import '../services/database_service.dart';
 
 class ActivityProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService();
   List<Activity> _activities = [];
+  List<SportCategory> _sportCategories = [];
   Activity? _currentActivity;
 
   List<Activity> get activities => _activities;
+  List<SportCategory> get sportCategories => _sportCategories;
   Activity? get currentActivity => _currentActivity;
 
   ActivityProvider() {
@@ -17,11 +20,32 @@ class ActivityProvider extends ChangeNotifier {
   Future<void> _init() async {
     await _db.init();
     await loadActivities();
+    await loadSportCategories();
   }
 
   Future<void> loadActivities() async {
     _activities = await _db.getAllActivities();
     notifyListeners();
+  }
+
+  Future<void> loadSportCategories() async {
+    _sportCategories = await _db.getAllSportCategories();
+    notifyListeners();
+  }
+
+  Future<void> addSportCategory(String name, String emoji) async {
+    final category = SportCategory(
+      name: name,
+      emoji: emoji,
+      isCustom: true,
+    );
+    await _db.insertSportCategory(category);
+    await loadSportCategories();
+  }
+
+  Future<void> deleteSportCategory(int id) async {
+    await _db.deleteSportCategory(id);
+    await loadSportCategories();
   }
 
   Future<void> startActivity(String type) async {
